@@ -1,8 +1,12 @@
 var express = require('express');
-var app = express();
 var path = require('path');
-var formidable = require('formidable');
 var fs = require('fs');
+
+var formidable = require('formidable');
+var printer = require('./printer');
+
+var app = express();
+
 
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -24,7 +28,10 @@ app.post('/upload', function(req, res){
   // every time a file has been uploaded successfully,
   // rename it to it's orignal name
   form.on('file', function(field, file) {
-    fs.rename(file.path, path.join(form.uploadDir, file.name));
+
+    const newname = path.join(form.uploadDir, `web-print-${file.name}`);
+
+    fs.rename(file.path, newname, () => printer.job(newname, {}));
   });
 
   // log any errors that occur
